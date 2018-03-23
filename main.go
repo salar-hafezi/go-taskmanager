@@ -5,7 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/salar-hafezi/go-taskmanager/common"
+	"github.com/salar-hafezi/go-taskmanager/routers"
 )
 
 func index(w http.ResponseWriter, r *http.Request) {
@@ -13,9 +14,12 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	r := mux.NewRouter()
+	router := routers.InitRoutes()
 
-	r.HandleFunc("/", index)
+	server := &http.Server{
+		Addr:    common.AppConfig.Server,
+		Handler: router,
+	}
 
-	log.Fatal(http.ListenAndServe(":3000", r))
+	log.Fatal(server.ListenAndServe())
 }
