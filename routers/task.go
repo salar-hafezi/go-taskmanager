@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/salar-hafezi/go-taskmanager/common"
 	"github.com/salar-hafezi/go-taskmanager/controllers"
@@ -16,12 +18,12 @@ const (
 )
 
 func SetTaskRoutes(router *mux.Router) *mux.Router {
-	router.HandleFunc(CreateTask, common.Authorize(controllers.CreateTask)).Methods("POST")
-	router.HandleFunc(UpdateTask, common.Authorize(controllers.UpdateTask)).Methods("PUT")
-	router.HandleFunc(GetTasks, common.Authorize(controllers.GetTasks)).Methods("GET")
-	router.HandleFunc(GetTaskById, common.Authorize(controllers.GetTaskById)).Methods("GET")
-	router.HandleFunc(GetTasksByUser, common.Authorize(controllers.GetTasksByUser)).Methods("GET")
-	router.HandleFunc(DeleteTask, common.Authorize(controllers.DeleteTask)).Methods("DELETE")
+	router.Handle(CreateTask, common.Authorize(http.HandlerFunc(controllers.CreateTask))).Methods("POST")
+	router.Handle(UpdateTask, common.Authorize(http.HandlerFunc(controllers.UpdateTask))).Methods("PUT")
+	router.Handle(GetTasks, common.Authorize(http.HandlerFunc(controllers.GetTasks))).Methods("GET")
+	router.Handle(GetTaskById, common.Authorize(http.HandlerFunc(controllers.GetTaskByID))).Methods("GET")
+	router.Handle(GetTasksByUser, common.Authorize(http.HandlerFunc(controllers.GetTasksByUser))).Methods("GET")
+	router.Handle(DeleteTask, common.Authorize(http.HandlerFunc(controllers.DeleteTask))).Methods("DELETE")
 
 	return router
 }

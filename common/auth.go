@@ -41,7 +41,8 @@ func initKeys() {
 	if err != nil {
 		log.Fatalf("[initKeys]: %s\n", err)
 	}
-	signKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	signKey, err = jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+
 	if err != nil {
 		log.Fatalf("[initKeys]: %s\n", err)
 	}
@@ -49,7 +50,8 @@ func initKeys() {
 	if err != nil {
 		log.Fatalf("[initKeys]: %s\n", err)
 	}
-	verifyKey, err := jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	verifyKey, err = jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+
 	if err != nil {
 		log.Fatalf("[initKeys]: %s\n", err)
 	}

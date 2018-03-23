@@ -6,14 +6,14 @@ import (
 
 	"github.com/salar-hafezi/go-taskmanager/common"
 	"github.com/salar-hafezi/go-taskmanager/data"
-	"github.com/salar-hafezi/go-taskmanager/models"	
+	"github.com/salar-hafezi/go-taskmanager/models"
 )
 
 // add a new User document
 // Handler for POST /users/register
-func Register(w http.ResponseWriter, r *http.Request)  {
+func Register(w http.ResponseWriter, r *http.Request) {
 	var dataResource UserResource
-	error := json.NewDecoder(r.Body).Decode(&dataResource)
+	err := json.NewDecoder(r.Body).Decode(&dataResource)
 	if err != nil {
 		common.DisplayAppError(
 			w,
@@ -48,7 +48,7 @@ func Register(w http.ResponseWriter, r *http.Request)  {
 
 // authenticate with username and password
 // Handler for POST /users/login
-func Login(w http.ResponseWriter, r *http.Request)  {
+func Login(w http.ResponseWriter, r *http.Request) {
 	var dataResource LoginResource
 	var token string
 	err := json.NewDecoder(r.Body).Decode(&dataResource)
@@ -63,13 +63,13 @@ func Login(w http.ResponseWriter, r *http.Request)  {
 	}
 	loginModel := dataResource.Data
 	loginUser := models.User{
-		Email: loginModel.Email,
+		Email:    loginModel.Email,
 		Password: loginModel.Password,
 	}
 	context := NewContext()
 	defer context.Close()
 	col := context.DbCollection("users")
-	repo := %data.UserRepository{C: col}
+	repo := &data.UserRepository{C: col}
 	user, err := repo.Login(loginUser)
 	if err != nil {
 		common.DisplayAppError(
@@ -80,34 +80,34 @@ func Login(w http.ResponseWriter, r *http.Request)  {
 		)
 		return
 	}
+	// generate JWT token
+	token, err = common.GenerateJWT(user.Email, "member")
+	if err != nil {
+		common.DisplayAppError(
+			w,
+			err,
+			"Error while generating the access token",
+			500,
+		)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	// eliminate hashpassword from response
+	user.HashPassword = nil
+	authUser := AuthUserModel{
+		User:  user,
+		Token: token,
+	}
+	j, err := json.Marshal(AuthUserResource{Data: authUser})
+	if err != nil {
+		common.DisplayAppError(
+			w,
+			err,
+			"An unexpected error has occurred",
+			500,
+		)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(j)
 }
-// generate JWT token
-token, err := common.GenerateJWT(user.Email, "member")
-if err != nil {
-	common.DisplayAppError(
-		w,
-		err,
-		"Error while generating the access token",
-		500,
-	)
-	return
-}
-w.Header().Set("Content-Type", "application/json")
-// eliminate hashpassword from response
-user.HashPassword = nil
-authUser := AuthUserModel{
-	User: user,
-	Token: token,
-}
-j, err := json.Marshal(AuthUserResource{Data: authUser})
-if err != nil {
-	common.DisplayAppError(
-		w,
-		err,
-		"An unexpected error has occurred",
-		500,
-	)
-	return
-}
-w.WriteHeader(http.StatusOK)
-w.Write(j)
